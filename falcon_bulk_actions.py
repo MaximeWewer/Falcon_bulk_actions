@@ -13,8 +13,8 @@ parser = ArgumentParser()
 parser.add_argument("--client_id", help="Client ID")
 parser.add_argument("--client_secret", help="Client Secret")
 parser.add_argument("--base_url", help="Base URL")
-parser.add_argument("--list_scripts", help="Show or null")
-parser.add_argument("--list_putfiles", help="Show or null")
+parser.add_argument("--list_scripts", help="Show")
+parser.add_argument("--list_putfiles", help="Show")
 parser.add_argument("--machines_name", help="Name of hosts")
 parser.add_argument("--machines_plateform", help="Name of OS plateform (Windows/Linux/Mac)")
 parser.add_argument("--scripts_name", help="List of scripts name")
@@ -81,9 +81,7 @@ def get_hosts(machines_name: str, machine_plateform: str) -> list:
             params_filter.append(f"platform_name:'{machine_plateform}'")
 
             # Retrieve a host list filter by hostname & plateform
-            host_search_result = falcon_hosts.query_devices_by_filter(
-                filter='+'.join(params_filter)
-            )
+            host_search_result = falcon_hosts.query_devices_by_filter(filter='+'.join(params_filter))
             host_details_found = get_hosts_details(host_search_result, host)
             if host_details_found:
                 for host in host_details_found:
@@ -92,9 +90,7 @@ def get_hosts(machines_name: str, machine_plateform: str) -> list:
     if machines_name is not None and machine_plateform is None:
         for host in machines_name.split(","):
             # Retrieve a host list filter by hostname
-            host_search_result = falcon_hosts.query_devices_by_filter(
-                filter=f"hostname:'{host}'"
-            )
+            host_search_result = falcon_hosts.query_devices_by_filter(filter=f"hostname:'{host}'")
             host_details_found = get_hosts_details(host_search_result, host)
             if host_details_found:
                 for host in host_details_found:
@@ -102,9 +98,7 @@ def get_hosts(machines_name: str, machine_plateform: str) -> list:
 
     if machines_name is None and machine_plateform is not None:
         # Retrieve a host list filter by plateform
-        hosts_search_result = falcon_hosts.query_devices_by_filter(
-            filter=f"platform_name:'{machine_plateform}'"
-        )
+        hosts_search_result = falcon_hosts.query_devices_by_filter(filter=f"platform_name:'{machine_plateform}'")
         hosts_details_found = get_hosts_details(hosts_search_result, None)
         if hosts_details_found:
             for host in hosts_details_found:
@@ -137,12 +131,12 @@ def get_hosts_details(hosts_search_result: dict, hosts_name: str | None) -> str:
 
 def clean_hosts_list(hosts: list) -> list:
     """Delete duplicate hosts"""
-    seen = set()
+    unique_hosts = set()
     hosts_list = []
     for host in hosts:
         temp = tuple(host.items())
-        if temp not in seen:
-            seen.add(temp)
+        if temp not in unique_hosts:
+            unique_hosts.add(temp)
             hosts_list.append(host)
     return hosts_list
 
@@ -210,15 +204,12 @@ def delete_session(sessions_list: list) -> None:
         if delete_session["status_code"] != 204:
             handle_error(delete_session["body"]["errors"])
 
-def batch_admin_command(base_command: str, batch_id: dict, command: str, name_script_or_putfile: str | None, hosts_list: list) -> None:
+def batch_admin_command(base_command: str, batch_id: dict, command: str, log_info: str, hosts_list: list) -> None:
     """Execute admin command"""
     # Execute batch command
     admin_command = falcon_rtra.batch_admin_command(base_command=base_command, batch_id=batch_id, command_string=command, persist_all=False, timeout=90, timeout_duration="5m")
     if admin_command["status_code"] == 201:
-        if name_script_or_putfile:
-            handle_201_code(admin_command, f"batch_{base_command}_{name_script_or_putfile}", False, hosts_list)
-        else:
-            handle_201_code(admin_command, f"batch_{base_command}", False, hosts_list)
+            handle_201_code(admin_command, f"batch_{base_command}_{log_info}", False, hosts_list)
     else:
         # Retrieve the details of the error response
         handle_error(admin_command["body"]["errors"])
@@ -269,17 +260,21 @@ if __name__ == "__main__":
             if batch_init["body"]["batch_id"]:
                 if args.scripts_name is not None:
                     for script in args.scripts_name.split(","):
-                        batch_admin_command(batch_id=batch_init["body"]["batch_id"], base_command="runscript", command=f"runscript -CloudFile={script}", name_script_or_putfile=script, hosts_list=hosts_list)
+                        # Command : runscript -CloudFile
+                        batch_admin_command(batch_id=batch_init["body"]["batch_id"], base_command="runscript", command=f"runscript -CloudFile={script}", log_info=script, hosts_list=hosts_list)
                     delete_session(batch_init["body"]["resources"])
                 if args.putfiles_name is not None:
                     for putfile in args.putfiles_name.split(","):
-                        batch_admin_command(batch_id=batch_init["body"]["batch_id"], base_command="put", command=f"put {putfile}", name_script_or_putfile=putfile, hosts_list=hosts_list)
+                        # Command : put
+                        batch_admin_command(batch_id=batch_init["body"]["batch_id"], base_command="put", command=f"put {putfile}", log_info=putfile, hosts_list=hosts_list)
                         if args.machines_plateform == "Windows":
-                            batch_admin_command(batch_id=batch_init["body"]["batch_id"], base_command="runscript", command=f"runscript -HostPath='C:\{putfile}'", name_script_or_putfile=putfile, hosts_list=hosts_list)
+                            # Command : runscript -HostPath
+                            batch_admin_command(batch_id=batch_init["body"]["batch_id"], base_command="runscript", command=f"runscript -HostPath='C:\{putfile}'", log_info=putfile, hosts_list=hosts_list)
                         else:
-                            batch_admin_command(batch_id=batch_init["body"]["batch_id"], base_command="runscript", command=f"runscript -HostPath='/{putfile}'", name_script_or_putfile=putfile, hosts_list=hosts_list)
+                            batch_admin_command(batch_id=batch_init["body"]["batch_id"], base_command="runscript", command=f"runscript -HostPath='/{putfile}'", log_info=putfile, hosts_list=hosts_list)
                     delete_session(batch_init["body"]["resources"])
                 if args.raw_commands is not None:
                     for command in args.raw_commands.split(","):
-                        batch_admin_command(batch_id=batch_init["body"]["batch_id"], base_command="runscript", command=f"runscript -Raw=```{command}```", name_script_or_putfile=None, hosts_list=hosts_list)
+                        # Command : runscript -Raw
+                        batch_admin_command(batch_id=batch_init["body"]["batch_id"], base_command="runscript", command=f"runscript -Raw=```{command}```", log_info="raw_command", hosts_list=hosts_list)
                     delete_session(batch_init["body"]["resources"])
