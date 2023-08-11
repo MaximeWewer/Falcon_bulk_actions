@@ -22,22 +22,31 @@ You can adapt script to suit your needs.
 - You can list your falcon RTR "custom scripts" (```--list_scripts show```), "put files" (```--list_putfiles show```) or both
 - You can choose to run script on platform (```--machines_plateform```), machine (```--machines_name```) or both
 - If you run Linux script on Windows, don't worry it's detected and not executed. Logic works on all platforms.
-- In this script I using only the commands ```put```, ```runscript -CloudFile```, ```runscript -HostPath```, ```runscript -Raw```. You can adapt script to implement more RTR commands ;-)
+- In this script I using only the commands ```put```, ```runscript -CloudFile```, ```runscript -HostPath```, ```runscript -Raw```.
+
+You can adapt script to implement more RTR commands ;-)
 
 ### Commands examples
-- List of scripts & putfiles : 
+- List of scripts & putfiles :
+  
 ```python.exe .\falcon_bulk_actions.py --client_id <client_id> --client_secret <client_secret> --base_url <base_url> --list_scripts show --list_putfiles show```
-- Execute script on specific hosts : 
+- Execute script on specific hosts :
+  
 ```python.exe .\falcon_bulk_actions.py --client_id <client_id> --client_secret <client_secret> --base_url <base_url> --machines_name HOSTNAME,*HOST,HOST* --scripts_name script1```
-- Execute script on Windows hosts : 
+- Execute script on Windows hosts :
+  
 ```python.exe .\falcon_bulk_actions.py --client_id <client_id> --client_secret <client_secret> --base_url <base_url> --machines_plateform Windows --scripts_name script1,script2```
 - Execute script on specific Windows hosts :
+  
 ```python.exe .\falcon_bulk_actions.py --client_id <client_id> --client_secret <client_secret> --base_url <base_url> --machines_plateform Windows --machines_name HOSTNAME,*HOST,HOST* --scripts_name script1```
 - Execute putfiles on Linux hosts :
+  
 ```python.exe .\falcon_bulk_actions.py --client_id <client_id> --client_secret <client_secret> --base_url <base_url> --machines_plateform Linux --putfiles_name script1.sh,script2.sh```
-- Execute raw commands on Windows hosts : 
+- Execute raw commands on Windows hosts :
+  
 ```python.exe .\falcon_bulk_actions.py --client_id <client_id> --client_secret <client_secret> --base_url <base_url> --machines_plateform Windows --raw_commands "[System.Security.Principal.WindowsIdentity]::GetCurrent().Name"```
 - Execute raw commands on Linux hosts :
+  
 ```python.exe .\falcon_bulk_actions.py --client_id <client_id> --client_secret <client_secret> --base_url <base_url> --machines_plateform Linux --raw_commands "ls -la"```
 
 ### Log execution
