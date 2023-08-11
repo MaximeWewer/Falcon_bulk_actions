@@ -17,7 +17,7 @@ You can adapt script to suit your needs.
 
 ### Commands infos
 
-- You need to create API acces on your Falcon tenant (detail [here](https://www.crowdstrike.com/blog/tech-center/get-access-falcon-apis/)) with scopes "Hosts" in read, "RTR" in read/write and "RTRA" in write. 
+- You need to create API acces on your Falcon tenant (detail [here](https://www.crowdstrike.com/blog/tech-center/get-access-falcon-apis/)) with scopes "Hosts" in read, "RTR" in read/write and "RTRA" in write
 - You need to define your ```base_url``` (detail [here](https://www.falconpy.io/Usage/Environment-Configuration.html#base-url))
 - You can list your falcon RTR "custom scripts" (```--list_scripts show```), "put files" (```--list_putfiles show```) or both
 - You can choose to run script on platform (```--machines_plateform```), machine (```--machines_name```) or both
