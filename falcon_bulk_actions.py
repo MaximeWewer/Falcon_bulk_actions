@@ -72,7 +72,7 @@ def handle_error(errors: dict) -> None:
         error_log["error_message"] = error["message"]
         write_logs(error_log, f"error_{now}.json")
 
-def get_hosts(condition: str, machines_name: str | None, machine_plateform: str | None) -> dict:
+def get_hosts(condition: str, machines_name: str | None, machines_plateform: str | None) -> dict:
     """Get hosts list"""
     hosts_list = []
     params_filter = []
@@ -81,7 +81,7 @@ def get_hosts(condition: str, machines_name: str | None, machine_plateform: str 
         for host in machines_name.split(","):
             params_filter.append(f"hostname:'{host}'")
     
-    if machine_plateform is not None:
+    if machines_plateform is not None:
         for plateform in machine_plateform.split(","):
             params_filter.append(f"platform_name:'{plateform}'")
 
@@ -229,7 +229,7 @@ if __name__ == "__main__":
     if (args.machines_name is not None or args.machines_plateform is not None and 
         args.scripts_name is not None or args.putfiles_name is not None or args.raw_commands is not None):
         # Get list of hosts
-        hosts_list = get_hosts(condition=args.condition, machines_name=args.machines_name, machine_plateform=args.machines_plateform)
+        hosts_list = get_hosts(condition=args.condition, machines_name=args.machines_name, machines_plateform=args.machines_plateform)
         print(f"Number of hosts found => {len(hosts_list)}")
         if len(hosts_list) >= 1:
             # Init batch session
