@@ -82,7 +82,7 @@ def get_hosts(condition: str, machines_name: str | None, machines_plateform: str
             params_filter.append(f"hostname:'{host}'")
     
     if machines_plateform is not None:
-        for plateform in machine_plateform.split(","):
+        for plateform in machines_plateform.split(","):
             params_filter.append(f"platform_name:'{plateform}'")
 
     # Retrieve a host list
